@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.6.0_32"/>
-	<classpathentry kind="lib" path="lib/qtjambi-4.8.1.jar"/>
-	<classpathentry kind="lib" path="lib/qtjambi-designer-4.8.1.jar" sourcepath="/home/ivan/devel/qtjambi-community"/>
-	<classpathentry kind="lib" path="lib/qtjambi-examples-4.8.1.jar"/>
-	<classpathentry kind="lib" path="lib/qtjambi-linux64-gcc-4.8.1.jar"/>
+	<classpathentry kind="src" path="antlr-generated"/>
 	<classpathentry kind="lib" path="lib/antlr-3.4-complete.jar"/>
+	<classpathentry kind="lib" path="lib/qtjambi-4.8.1.jar" sourcepath="D:/DEVEL/qtjambi-community"/>
+	<classpathentry kind="lib" path="lib/qtjambi-win32-msvc2010-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/qtjambi-examples-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/qtjambi-designer-4.8.1.jar" sourcepath="/home/ivan/devel/qtjambi-community"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.6.0_29"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
