@@ -29,7 +29,7 @@ public class WindowFactory {
 
 		Tree AST = parse(filename);
 		
-		switch (WindowType.enumFromSuffix(file.suffix())) {
+		switch (WindowTypeEnum.enumFromSuffix(file.suffix())) {
 		case APP:
 			window = new AppWindow();			
 			break;

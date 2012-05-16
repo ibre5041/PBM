@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 
-public enum WindowType {
+public enum WindowTypeEnum {
 	//suffixes = Arrays.asList(".sra", ".srd", ".srf", ".srj", ".srm", ".srq", ".srs", ".sru", ".srw");
 	APP("sra"),
 	DATA("srd");
@@ -13,21 +13,21 @@ public enum WindowType {
 		return _suffix;		
 	}
 	
-	public static WindowType enumFromSuffix(String suffix) {
+	public static WindowTypeEnum enumFromSuffix(String suffix) {
 		return _str2enum.get(suffix);
 	}
 	
-	private WindowType(String suffix) {
+	private WindowTypeEnum(String suffix) {
 		_suffix = suffix;
 	}
 		
 	private String _suffix;
-	private static HashMap<String, WindowType> _str2enum;
+	private static HashMap<String, WindowTypeEnum> _str2enum;
 	
 	static
     {
-		_str2enum = new HashMap<String, WindowType>();
-        for (WindowType wt : EnumSet.allOf(WindowType.class))
+		_str2enum = new HashMap<String, WindowTypeEnum>();
+        for (WindowTypeEnum wt : EnumSet.allOf(WindowTypeEnum.class))
         {
         	_str2enum.put(wt._suffix.toLowerCase(), wt);
         }

@@ -124,6 +124,7 @@ window_property
 	 window_property_attributes_sub?
 	 RPAREN
 	)
+	-> ^('windowprop' attribute_name array_decl_sub? LPAREN window_property_attributes_sub? RPAREN)
 	;
 
 window_property_attributes_sub
