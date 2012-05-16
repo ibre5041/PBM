@@ -9,6 +9,8 @@
 
 package org.ibre5041.parsing;
 
+import org.antlr.runtime.ANTLRStringStream;
+
 //import java.io.*;
 
 /**

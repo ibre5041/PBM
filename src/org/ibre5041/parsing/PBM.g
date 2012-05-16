@@ -49,11 +49,11 @@ tokens {
 }
 
 @header {
-  package org.pbm;
+  package org.ibre5041.parsing;
 }
 
 @lexer::header {
-  package org.pbm;
+  package org.ibre5041.parsing;
 }
 
 @lexer::members {

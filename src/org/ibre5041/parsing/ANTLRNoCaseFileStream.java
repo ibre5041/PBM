@@ -11,6 +11,9 @@ package org.ibre5041.parsing;
 
 import java.io.*;
 
+import org.antlr.runtime.ANTLRFileStream;
+import org.antlr.runtime.CharStream;
+
 /**
  *
  * @author Jim Idle
