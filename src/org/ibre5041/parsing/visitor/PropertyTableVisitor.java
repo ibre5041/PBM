@@ -14,11 +14,23 @@ public class PropertyTableVisitor extends BaseVisitor {
 
 	@Override
 	public void visit(WindowPropertyNode n) {
-		// Okay we've found some window property, is this one listed in the enum
-		// PropertyTableType?
+		_lastPropertyTable = null; // reset property table
+		
 		String propName = n.getTree().getChild(0).getText();
-		DataWindow.PropertyTableTypeEnum currentProperty = DataWindow.PropertyTableTypeEnum
-				.enumFromName(propName);
+		// Handle special case property table is the most importannt and has multivalue suppropery "column"
+		if (propName.equalsIgnoreCase("table"))
+		{
+			
+		}
+		if (propName.equalsIgnoreCase("text"))
+		{
+			_lastPropertyTable = new PropertyTable(propName.toLowerCase());
+			_ref.getTexts().add(_lastPropertyTable);
+		}
+		
+		// Okay we've found some window property, is this one listed in the enum
+		// PropertyTableType?		
+		DataWindow.PropertyTableTypeEnum currentProperty = DataWindow.PropertyTableTypeEnum.enumFromName(propName);
 		if (currentProperty == null)
 			return;
 
@@ -30,11 +42,15 @@ public class PropertyTableVisitor extends BaseVisitor {
 	}
 
 	@Override
-	public void visit(WindowSubPropertyNode n) {		
+	public void visit(WindowSubPropertyNode n) {
+		
+		// Generic properties
+		if( _lastPropertyTable == null)
+			return;
 		Tree astNode = n.getTree();
 		String name = astNode.getChild(0).getChild(0).getText();
 		String value = astNode.getChild(1).getChild(0).getText();
-		_lastPropertyTable.put(name, value);		
+		_lastPropertyTable.put(name, value);
 	}
 
 	private DataWindow _ref;

@@ -17,6 +17,7 @@ package org.ibre5041.parsing;
 import java.io.IOException;
 
 import org.antlr.runtime.RecognitionException;
+import org.ibre5041.parsing.window.DataWindow;
 import org.ibre5041.parsing.window.Window;
 import org.ibre5041.parsing.window.WindowFactory;
 
@@ -28,7 +29,11 @@ public class test1 {
 	public static void main(String[] args) {
 		try {
 			Window window = WindowFactory.getInstance().createWindow(args[0]);
-			System.out.println(window.getAST().toStringTree());
+			if( window instanceof DataWindow)
+			{
+				System.out.println( ((DataWindow)window).getSQL());
+			}
+			//System.out.println(window.getAST().toStringTree());
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RecognitionException e) {

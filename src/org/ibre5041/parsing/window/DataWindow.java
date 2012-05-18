@@ -50,21 +50,38 @@ public class DataWindow extends AbstractWindow implements Window {
 	@Override
 	public void setAST(Tree ast) {
 		super.setAST(ast);
-
-		// Visiotors this window cares about
+		// Visitors this window cares about
 		List<BaseVisitor> visitors = new LinkedList<BaseVisitor>();
 		BaseVisitor v = new PropertyTableVisitor(this);
 		visitors.add(v);
 		walk(ast, visitors);
 	}
-
+	
 	public HashMap<PropertyTableTypeEnum, PropertyTable> getProperties() {
 		return _properties;
 	}
-
+	
 	public void setProperties(HashMap<PropertyTableTypeEnum, PropertyTable> _properties) {
 		this._properties = _properties;
 	}
-
+	// Single occurence properties
 	private HashMap<PropertyTableTypeEnum, PropertyTable> _properties = new HashMap<PropertyTableTypeEnum, PropertyTable>();
+	
+	// Multiple occurence properties
+	public List<PropertyTable> getTexts() {
+		return _texts;
+	}
+
+	public void setTexts(List<PropertyTable> _texts) {
+		this._texts = _texts;
+	}
+	
+	private List<PropertyTable> _texts = new LinkedList<PropertyTable>();
+	
+	public String getSQL()
+	{
+//		String retval = _properties.get(PropertyTableTypeEnum.TABLE).get("retrieve");
+//		retval  = retval.replaceAll("~\"", "\""); // replace PBish ~" by "  
+		return "";
+	}
 }
