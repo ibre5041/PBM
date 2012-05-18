@@ -1,4 +1,4 @@
-package org.ibre5041.parsing.window;
+package org.ibre5041.parsing.node;
 
 import java.util.EnumSet;
 import java.util.HashMap;

@@ -17,8 +17,8 @@ package org.ibre5041.parsing;
 import java.io.IOException;
 
 import org.antlr.runtime.RecognitionException;
-import org.ibre5041.parsing.main.WindowFactory;
-import org.ibre5041.parsing.main.Window;
+import org.ibre5041.parsing.window.Window;
+import org.ibre5041.parsing.window.WindowFactory;
 
 public class test1 {
 

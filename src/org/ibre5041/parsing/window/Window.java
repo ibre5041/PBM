@@ -1,4 +1,4 @@
-package org.ibre5041.parsing.main;
+package org.ibre5041.parsing.window;
 
 import org.antlr.runtime.tree.Tree;
 

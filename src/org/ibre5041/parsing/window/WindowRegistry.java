@@ -1,6 +1,7 @@
-package org.ibre5041.parsing.main;
+package org.ibre5041.parsing.window;
 
 import java.util.HashMap;
+
 
 public class WindowRegistry extends HashMap<String, Window> 
 {	
