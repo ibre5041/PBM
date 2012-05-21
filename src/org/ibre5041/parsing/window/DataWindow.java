@@ -6,9 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.runtime.tree.Tree;
-import org.ibre5041.parsing.node.BaseNode;
-import org.ibre5041.parsing.node.NodeTypeEnum;
-import org.ibre5041.parsing.node.NodeTypeRegistry;
 import org.ibre5041.parsing.visitor.BaseVisitor;
 import org.ibre5041.parsing.visitor.PropertyTableVisitor;
 import org.ibre5041.parsing.window.util.PropertyTable;
@@ -71,12 +68,28 @@ public class DataWindow extends AbstractWindow implements Window {
 	public List<PropertyTable> getTexts() {
 		return _texts;
 	}
-
+	
 	public void setTexts(List<PropertyTable> _texts) {
 		this._texts = _texts;
 	}
 	
 	private List<PropertyTable> _texts = new LinkedList<PropertyTable>();
+	
+	
+	public HashMap<String, PropertyTable> getColumns() {
+		return _columns;
+	}
+
+	public PropertyTable getColumn(String key) {
+		return _columns.get(key);
+	}
+
+	public void addColumn(PropertyTable column) {
+		this._columns.put(column.get("name"), column);
+	}
+	
+	private HashMap<String, PropertyTable> _columns = new HashMap<String, PropertyTable>();
+	
 	
 	public String getSQL()
 	{

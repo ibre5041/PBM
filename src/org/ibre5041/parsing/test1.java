@@ -33,7 +33,7 @@ public class test1 {
 			{
 				System.out.println( ((DataWindow)window).getSQL());
 			}
-			//System.out.println(window.getAST().toStringTree());
+			System.out.println(window.getAST().toStringTree());
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RecognitionException e) {
