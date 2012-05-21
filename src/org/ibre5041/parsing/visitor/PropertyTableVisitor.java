@@ -1,11 +1,18 @@
 package org.ibre5041.parsing.visitor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.antlr.runtime.tree.Tree;
-import org.ibre5041.parsing.ParseException;
+import org.ibre5041.parsing.utils.ParseException;
+import org.ibre5041.parsing.window.AbstractWindow;
 import org.ibre5041.parsing.window.DataWindow;
 import org.ibre5041.parsing.window.WindowPropertyNode;
 import org.ibre5041.parsing.window.WindowSubPropertyNode;
+import org.ibre5041.parsing.window.util.Column;
 import org.ibre5041.parsing.window.util.PropertyTable;
+import org.ibre5041.parsing.window.util.TextLabel;
 
 public class PropertyTableVisitor extends BaseVisitor {
 
@@ -26,11 +33,17 @@ public class PropertyTableVisitor extends BaseVisitor {
 		}
 		if (propName.equalsIgnoreCase("column")) {
 			_lastPropertyTable = new PropertyTable(propName.toLowerCase());
+
+			_lastColumn = new Column();
+			ColumnVisitor cv = new ColumnVisitor(_lastColumn);
+			AbstractWindow.walk(n.getTree(), Arrays.asList((BaseVisitor)cv), 0);
 			return;
 		}
 		if (propName.equalsIgnoreCase("text")) {
 			_lastPropertyTable = new PropertyTable(propName.toLowerCase());
+			_lastTextLabel = new TextLabel();
 			_ref.getTexts().add(_lastPropertyTable);
+			_ref.addTextLabel(_lastTextLabel);
 			return;
 		}
 
@@ -70,4 +83,6 @@ public class PropertyTableVisitor extends BaseVisitor {
 
 	private DataWindow _ref;
 	private PropertyTable _lastPropertyTable = null;
+	private TextLabel _lastTextLabel;
+	private Column _lastColumn;
 }

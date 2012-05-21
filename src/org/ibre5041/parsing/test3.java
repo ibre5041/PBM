@@ -25,7 +25,7 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.runtime.tree.Tree;
 
-import org.ibre5041.parsing.ANTLRNoCaseFileStream;
+import org.ibre5041.parsing.utils.ANTLRNoCaseFileStream;
 
 public class test3 {
 

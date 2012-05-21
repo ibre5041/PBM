@@ -1,4 +1,4 @@
-package org.ibre5041.parsing;
+package org.ibre5041.parsing.utils;
 
 public class ParseException extends RuntimeException {
 	

@@ -9,6 +9,14 @@ import org.antlr.runtime.tree.Tree;
 import org.ibre5041.parsing.visitor.BaseVisitor;
 import org.ibre5041.parsing.visitor.PropertyTableVisitor;
 import org.ibre5041.parsing.window.util.PropertyTable;
+import org.ibre5041.parsing.window.util.TextLabel;
+
+import com.trolltech.qt.core.QRect;
+import com.trolltech.qt.core.Qt;
+import com.trolltech.qt.core.Qt.GlobalColor;	
+import com.trolltech.qt.gui.QColor;
+import com.trolltech.qt.gui.QPainter;
+import com.trolltech.qt.gui.QPen;
 
 public class DataWindow extends AbstractWindow implements Window {
 
@@ -16,8 +24,8 @@ public class DataWindow extends AbstractWindow implements Window {
 		DATAWINDOW("datawindow"), 
 		HEADER("header"), 
 		SUMMARY("summary"), 
-		FOOTER("footer"),
-		DETAIL("detail"),
+		FOOTER("footer"), 
+		DETAIL("detail"), 
 		TABLE("table");
 
 		public String getName() {
@@ -37,8 +45,7 @@ public class DataWindow extends AbstractWindow implements Window {
 
 		static {
 			_str2enum = new HashMap<String, PropertyTableTypeEnum>();
-			for (PropertyTableTypeEnum wt : EnumSet
-					.allOf(PropertyTableTypeEnum.class)) {
+			for (PropertyTableTypeEnum wt : EnumSet.allOf(PropertyTableTypeEnum.class)) {
 				_str2enum.put(wt._name.toLowerCase(), wt);
 			}
 		}
@@ -53,28 +60,37 @@ public class DataWindow extends AbstractWindow implements Window {
 		visitors.add(v);
 		walk(ast, visitors);
 	}
-	
+
 	public HashMap<PropertyTableTypeEnum, PropertyTable> getProperties() {
 		return _properties;
 	}
 	
+	public PropertyTable getProperty(PropertyTableTypeEnum e) {
+		return _properties.get(e);
+	}	
+
 	public void setProperties(HashMap<PropertyTableTypeEnum, PropertyTable> _properties) {
 		this._properties = _properties;
 	}
+
 	// Single occurence properties
 	private HashMap<PropertyTableTypeEnum, PropertyTable> _properties = new HashMap<PropertyTableTypeEnum, PropertyTable>();
-	
+
 	// Multiple occurence properties
 	public List<PropertyTable> getTexts() {
 		return _texts;
 	}
-	
+
 	public void setTexts(List<PropertyTable> _texts) {
 		this._texts = _texts;
 	}
-	
+
 	private List<PropertyTable> _texts = new LinkedList<PropertyTable>();
-	
+
+	public void addTextLabel(TextLabel tl) {
+		_textLabels.add(tl);
+	}
+	private List<TextLabel> _textLabels = new LinkedList<TextLabel>();
 	
 	public HashMap<String, PropertyTable> getColumns() {
 		return _columns;
@@ -87,14 +103,65 @@ public class DataWindow extends AbstractWindow implements Window {
 	public void addColumn(PropertyTable column) {
 		this._columns.put(column.get("name"), column);
 	}
-	
+
 	private HashMap<String, PropertyTable> _columns = new HashMap<String, PropertyTable>();
-	
-	
-	public String getSQL()
-	{
-//		String retval = _properties.get(PropertyTableTypeEnum.TABLE).get("retrieve");
-//		retval  = retval.replaceAll("~\"", "\""); // replace PBish ~" by "  
+
+	public String getSQL() {
+		// String retval =
+		// _properties.get(PropertyTableTypeEnum.TABLE).get("retrieve");
+		// retval = retval.replaceAll("~\"", "\""); // replace PBish ~" by "
 		return "";
 	}
+
+	@Override
+	public void paint(QPainter painter) {		
+		QRect v = painter.viewport();
+		_width = v.width() - 1;
+		
+		painter.setPen(QPen.NoPen);
+		painter.setBrush(Qt.BrushStyle.NoBrush);		
+		painter.setPen(new QColor(GlobalColor.darkBlue));
+		paintHeader(painter);
+		paintDetail(painter);
+		paintSummay(painter);
+		paintFooter(painter);
+	}
+		
+	private void paintHeader(QPainter painter) {
+		PropertyTable h = getProperty(PropertyTableTypeEnum.HEADER);
+		if ( h == null)
+			return;
+		int height = Integer.parseInt( h.get("height"));
+		if(height == 0)
+			return;
+		painter.drawRect(0, 0, _width, height);
+	}
+	
+	private void paintDetail(QPainter painter) {
+		PropertyTable d = getProperty(PropertyTableTypeEnum.DETAIL);
+		if ( d == null)
+			return;
+		int height = Integer.parseInt( d.get("height"));
+		if(height == 0)
+			return;
+		painter.drawRect(0, 0, _width, height);		
+	}
+	
+	private void paintSummay(QPainter painter) {
+		PropertyTable s = getProperty(PropertyTableTypeEnum.SUMMARY);
+		int height = Integer.parseInt( s.get("height"));
+		if(height == 0)
+			return;		
+		painter.drawRect(0, 0, _width, height);
+	}
+	
+	private void paintFooter(QPainter painter) {
+		PropertyTable f = getProperty(PropertyTableTypeEnum.FOOTER);
+		int height = Integer.parseInt( f.get("height"));
+		if(height == 0)
+			return;		
+		painter.drawRect(0, 0, _width, height);		
+	}
+	
+	private int _width;
 }

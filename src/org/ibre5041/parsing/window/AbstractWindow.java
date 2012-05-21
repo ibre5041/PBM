@@ -21,12 +21,12 @@ public abstract class AbstractWindow {
 		return _ast;
 	}
 	
-	protected void walk(Tree ast, List<BaseVisitor> visitors) {
+	public static void walk(Tree ast, List<BaseVisitor> visitors) {
 		walk(ast, visitors, 0);
 	}
 
 	//protected abstract void walk(Tree ast, List<BaseVisitor> visitors, int depth);
-	public void walk(Tree ast, List<BaseVisitor> visitors, int depth) {
+	public static void walk(Tree ast, List<BaseVisitor> visitors, int depth) {
 		if (ast == null)
 			return;
 

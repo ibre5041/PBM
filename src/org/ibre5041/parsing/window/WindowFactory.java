@@ -6,9 +6,9 @@ import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.runtime.tree.Tree;
-import org.ibre5041.parsing.ANTLRNoCaseFileStream;
 import org.ibre5041.parsing.PBMLexer;
 import org.ibre5041.parsing.PBMParser;
+import org.ibre5041.parsing.utils.ANTLRNoCaseFileStream;
 
 import com.trolltech.qt.core.QFileInfo;
 

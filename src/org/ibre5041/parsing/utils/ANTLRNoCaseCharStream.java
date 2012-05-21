@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package org.ibre5041.parsing;
+package org.ibre5041.parsing.utils;
 
 import org.antlr.runtime.ANTLRStringStream;
 
