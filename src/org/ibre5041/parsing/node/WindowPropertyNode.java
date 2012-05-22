@@ -1,8 +1,6 @@
-package org.ibre5041.parsing.window;
+package org.ibre5041.parsing.node;
 
 import org.antlr.runtime.tree.Tree;
-import org.ibre5041.parsing.node.BaseNode;
-import org.ibre5041.parsing.node.NodeTypeEnum;
 import org.ibre5041.parsing.visitor.BaseVisitor;
 
 public class WindowPropertyNode extends BaseNode {
@@ -27,5 +25,14 @@ public class WindowPropertyNode extends BaseNode {
 	WindowPropertyNode(Tree astNode)
 	{
 		super(astNode);
+	}
+	
+	public static String propertyNodeName(Tree astNode) {
+		StringBuffer sb = new StringBuffer(16);
+		for( int i=0; i < astNode.getChild(0).getChildCount(); i++) 
+		{
+			sb.append(astNode.getChild(0).getChild(i));
+		}
+		return sb.toString();
 	}	
 }

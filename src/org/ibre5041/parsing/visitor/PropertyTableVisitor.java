@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.antlr.runtime.tree.Tree;
+import org.ibre5041.parsing.node.WindowPropertyNode;
 import org.ibre5041.parsing.utils.ParseException;
 import org.ibre5041.parsing.window.AbstractWindow;
 import org.ibre5041.parsing.window.DataWindow;
-import org.ibre5041.parsing.window.WindowPropertyNode;
 import org.ibre5041.parsing.window.WindowSubPropertyNode;
 import org.ibre5041.parsing.window.util.Column;
 import org.ibre5041.parsing.window.util.PropertyTable;
@@ -23,26 +23,23 @@ public class PropertyTableVisitor extends BaseVisitor {
 	@Override
 	public void visit(WindowPropertyNode n) {
 		_lastPropertyTable = null; // reset property table
-
-		String propName = n.getTree().getChild(0).getText();
+		String propName = nodeToString(n.getTree());
 		// Handle special case property table is the most importannt and has
 		// multivalue suppropery "column"
 		if (propName.equalsIgnoreCase("table")) {
-			_lastPropertyTable = null;
 			return;
 		}
-		if (propName.equalsIgnoreCase("column")) {
-			_lastPropertyTable = new PropertyTable(propName.toLowerCase());
-
-			_lastColumn = new Column();
-			ColumnVisitor cv = new ColumnVisitor(_lastColumn);
-			AbstractWindow.walk(n.getTree(), Arrays.asList((BaseVisitor)cv), 0);
-			return;
-		}
+//		if (propName.equalsIgnoreCase("column")) {
+//			_lastPropertyTable = new PropertyTable(propName.toLowerCase());
+//
+//			_lastColumn = new Column();
+//			ColumnVisitor cv = new ColumnVisitor(_lastColumn);
+//			AbstractWindow.walk(n.getTree(), Arrays.asList((BaseVisitor)cv), 0);
+//			return;
+//		}
 		if (propName.equalsIgnoreCase("text")) {
-			_lastPropertyTable = new PropertyTable(propName.toLowerCase());
-			_lastTextLabel = new TextLabel();
-			_ref.getTexts().add(_lastPropertyTable);
+			_lastTextLabel = new TextLabel(_ref);
+			_lastPropertyTable = _lastPropertyTable;
 			_ref.addTextLabel(_lastTextLabel);
 			return;
 		}

@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import org.antlr.runtime.tree.Tree;
-import org.ibre5041.parsing.window.WindowPropertyNode;
 import org.ibre5041.parsing.window.WindowSubPropertyNode;
 
 public class NodeTypeRegistry extends HashMap<NodeTypeEnum, Class<? extends BaseNode>> {

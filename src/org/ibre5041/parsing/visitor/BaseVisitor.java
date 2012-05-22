@@ -1,7 +1,7 @@
 package org.ibre5041.parsing.visitor;
 
 import org.antlr.runtime.tree.Tree;
-import org.ibre5041.parsing.window.WindowPropertyNode;
+import org.ibre5041.parsing.node.WindowPropertyNode;
 import org.ibre5041.parsing.window.WindowSubPropertyNode;
 
 public abstract class BaseVisitor {

@@ -1,6 +1,6 @@
 package org.ibre5041.parsing.visitor;
 
-import org.ibre5041.parsing.window.WindowPropertyNode;
+import org.ibre5041.parsing.node.WindowPropertyNode;
 import org.ibre5041.parsing.window.WindowSubPropertyNode;
 import org.ibre5041.parsing.window.util.Column;
 
