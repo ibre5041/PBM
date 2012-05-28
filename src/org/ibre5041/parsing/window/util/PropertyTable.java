@@ -16,10 +16,10 @@ public class PropertyTable extends HashMap<String, String> {
     }
     
     public String getUnescaped(String key) {
-    	String retval = get(key);
-    		if( retval.charAt(0) == '\"')
-    			return retval.substring(1, retval.length()-1);
-    	return retval;
+		String retval = get(key);
+		if (retval != null && retval.charAt(0) == '\"')
+			return retval.substring(1, retval.length() - 1);
+		return retval;
     }
     
 	@Override

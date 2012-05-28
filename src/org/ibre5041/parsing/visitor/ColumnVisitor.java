@@ -20,17 +20,8 @@ public class ColumnVisitor extends BaseVisitor {
 
 	@Override
 	public void visit(WindowSubPropertyNode n) {
-		StringBuffer sb1 =new StringBuffer(16);
-		for(int i=0; i < n.getTree().getChild(0).getChildCount(); i++) {
-			sb1.append(n.getTree().getChild(0).getChild(i).getText());
-		}			
-		String propName = sb1.toString();
-		
-		StringBuffer sb2 =new StringBuffer(16);
-		for(int i=0; i < n.getTree().getChild(0).getChildCount(); i++) {
-			sb2.append(n.getTree().getChild(0).getChild(i).getText());
-		}			
-		String propVal= sb2.toString();
+		String propName = nodeToString(n.getTree().getChild(0));
+		String propVal = nodeToString(n.getTree().getChild(1));
 		
 		_ref.put(propName, propVal);
 	}

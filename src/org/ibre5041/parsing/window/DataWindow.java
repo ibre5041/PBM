@@ -9,6 +9,7 @@ import java.util.Map;
 import org.antlr.runtime.tree.Tree;
 import org.ibre5041.parsing.visitor.BaseVisitor;
 import org.ibre5041.parsing.visitor.PropertyTableVisitor;
+import org.ibre5041.parsing.window.util.Column;
 import org.ibre5041.parsing.window.util.PropertyTable;
 import org.ibre5041.parsing.window.util.TextLabel;
 
@@ -103,20 +104,28 @@ public class DataWindow extends AbstractWindow implements Window {
 		if (!tl.containsValue("name"))
 			_mtexts.put(tl.get("name"), tl);
 	}
+
+	public List<PropertyTable> getColumns() {
+		return _lcolumns;
+	}
+
+	public PropertyTable getColumn(String name) {
+		return _mcolumns.get(name);
+	}
+
+	public void setColumns(List<PropertyTable> _columns) {
+		this._lcolumns= _columns;
+	}
+
+	private List<PropertyTable> _lcolumns = new LinkedList<PropertyTable>();
+	private Map<String, PropertyTable> _mcolumns = new HashMap<String, PropertyTable>();
 	
-//	public HashMap<String, PropertyTable> getColumns() {
-//		return _columns;
-//	}
-//
-//	public PropertyTable getColumn(String key) {
-//		return _columns.get(key);
-//	}
-//
-//	public void addColumn(PropertyTable column) {
-//		this._columns.put(column.get("name"), column);
-//	}
-//
-//	private HashMap<String, PropertyTable> _columns = new HashMap<String, PropertyTable>();
+	public void addColumn(Column column) {
+		if (!_lcolumns.contains(column))
+			_lcolumns.add(column);
+		if (!column.containsValue("name"))
+			_mcolumns.put(column.get("name"), column);
+	}
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer(128);
@@ -141,7 +150,7 @@ public class DataWindow extends AbstractWindow implements Window {
 
 	@Override
 	public void paint(QPainter painter) {
-		_y = 0;
+		_y = 1;
 		QRect v = painter.viewport();
 		_width = v.width() - 1;
 		
@@ -150,10 +159,12 @@ public class DataWindow extends AbstractWindow implements Window {
 		painter.setPen(new QColor(GlobalColor.darkBlue));
 	
 		paintPropertyTable(painter, PropertyTableTypeEnum.HEADER);
-		painter.drawText( painter.viewport().translated(2, _y + 40), Qt.TextFlag.TextWordWrap.value(), getSQL());
 		paintPropertyTable(painter, PropertyTableTypeEnum.DETAIL);
 		paintPropertyTable(painter, PropertyTableTypeEnum.SUMMARY);
-		paintPropertyTable(painter, PropertyTableTypeEnum.FOOTER);		
+		paintPropertyTable(painter, PropertyTableTypeEnum.FOOTER);
+		paintColumns(painter, "detail");
+		_y += 10;
+		painter.drawText( painter.viewport().translated(2, _y + 40), Qt.TextFlag.TextWordWrap.value(), getSQL());		
 	}
 		
 	private void paintPropertyTable(QPainter painter, PropertyTableTypeEnum e)
@@ -164,12 +175,12 @@ public class DataWindow extends AbstractWindow implements Window {
 		int height = Integer.parseInt( f.get("height"));
 		if (height == 0)
 			return;		
-		painter.drawRect(0, _y + 0, _width, _y + height);
+		painter.drawRect(0, _y + 0, _width, height);
 		painter.drawText(2, _y + 20, e.toString());
 		paintTexts(painter, e.getName());
-		_y += height + 2;		
+		_y += height + 4;		
 	}
-	
+
 	private void paintTexts(QPainter painter, String band)
 	{
 		for (PropertyTable tl : _ltexts) {
@@ -177,7 +188,20 @@ public class DataWindow extends AbstractWindow implements Window {
 				continue;
 			int x = Integer.parseInt( tl.getUnescaped("x"));					
 			int y = Integer.parseInt( tl.getUnescaped("y"));
-			painter.drawText(x, _y + y, tl.getUnescaped("text"));
+			int textHeight = Integer.parseInt( tl.getUnescaped("font.height"));
+			painter.drawText(x, _y + y - textHeight, tl.getUnescaped("text"));
+		}
+	}
+
+	private void paintColumns(QPainter painter, String band)
+	{
+		for (PropertyTable tl : _lcolumns) {
+			if( !tl.get("band").equalsIgnoreCase(band))
+				continue;
+			int x = Integer.parseInt( tl.getUnescaped("x"));					
+			int y = Integer.parseInt( tl.getUnescaped("y"));
+			int textHeight = Integer.parseInt( tl.getUnescaped("font.height"));
+			painter.drawText(x, _y + y - textHeight, tl.getUnescaped("name"));
 		}
 	}
 	

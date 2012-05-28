@@ -25,19 +25,19 @@ public class PropertyTableVisitor extends BaseVisitor {
 	@Override
 	public void visit(WindowPropertyNode n) {
 		String propName = nodeToString(n.getTree().getChild(0));
-		// Handle special case property table is the most importannt and has
-		// multivalue suppropery "column"
-//		if (propName.equalsIgnoreCase("table")) {
-//			return;
-//		}
-//		if (propName.equalsIgnoreCase("column")) {
-//			_lastPropertyTable = new PropertyTable(propName.toLowerCase());
-//
-//			_lastColumn = new Column();
-//			ColumnVisitor cv = new ColumnVisitor(_lastColumn);
-//			AbstractWindow.walk(n.getTree(), Arrays.asList((BaseVisitor)cv), 0);
-//			return;
-//		}
+
+		// multi value subpropery "column"
+		if (propName.equalsIgnoreCase("column")) {
+			Column c = new Column(_ref);
+			ColumnVisitor cv = new ColumnVisitor(c);
+			AbstractWindow.walk(n.getTree().getChild(1), Arrays.asList((BaseVisitor)cv), 0);
+			_ref.addColumn(c);
+			
+			_PropertyTableStack.push(NULL_TABLE);
+			return;
+		}
+		
+		// multi value subpropery "text"
 		if (propName.equalsIgnoreCase("text")) {
 			TextLabel _lastTextLabel = new TextLabel(_ref);
 			_PropertyTableStack.push(_lastTextLabel);
@@ -73,7 +73,6 @@ public class PropertyTableVisitor extends BaseVisitor {
 		
 		if (subPropName.equalsIgnoreCase("column")) {
 			_PropertyTableStack.push(NULL_TABLE);
-//			_lastPropertyTable = new PropertyTable(subPropName.toLowerCase());
 			return;
 		}
 		
@@ -98,8 +97,6 @@ public class PropertyTableVisitor extends BaseVisitor {
 	
 	private DataWindow _ref;
 	private Deque<PropertyTable> _PropertyTableStack = new ArrayDeque<PropertyTable>();
-	//private PropertyTable _lastPropertyTable = null;
-	private Column _lastColumn;
 	// bacause ArrayDeque can not hold real nulls
 	private static PropertyTable NULL_TABLE = new PropertyTable("NULL_TABLE");
 }
