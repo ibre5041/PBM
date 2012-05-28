@@ -1,7 +1,9 @@
 package org.ibre5041.parsing.visitor;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 
 import org.antlr.runtime.tree.Tree;
@@ -22,13 +24,12 @@ public class PropertyTableVisitor extends BaseVisitor {
 
 	@Override
 	public void visit(WindowPropertyNode n) {
-		_lastPropertyTable = null; // reset property table
-		String propName = nodeToString(n.getTree());
+		String propName = nodeToString(n.getTree().getChild(0));
 		// Handle special case property table is the most importannt and has
 		// multivalue suppropery "column"
-		if (propName.equalsIgnoreCase("table")) {
-			return;
-		}
+//		if (propName.equalsIgnoreCase("table")) {
+//			return;
+//		}
 //		if (propName.equalsIgnoreCase("column")) {
 //			_lastPropertyTable = new PropertyTable(propName.toLowerCase());
 //
@@ -38,8 +39,8 @@ public class PropertyTableVisitor extends BaseVisitor {
 //			return;
 //		}
 		if (propName.equalsIgnoreCase("text")) {
-			_lastTextLabel = new TextLabel(_ref);
-			_lastPropertyTable = _lastPropertyTable;
+			TextLabel _lastTextLabel = new TextLabel(_ref);
+			_PropertyTableStack.push(_lastTextLabel);
 			_ref.addTextLabel(_lastTextLabel);
 			return;
 		}
@@ -48,38 +49,57 @@ public class PropertyTableVisitor extends BaseVisitor {
 		// PropertyTableType?
 		DataWindow.PropertyTableTypeEnum currentProperty = DataWindow.PropertyTableTypeEnum.enumFromName(propName);
 		if (currentProperty == null)
+		{
+			_PropertyTableStack.push(NULL_TABLE);
 			return;
+		}
 
 		if (_ref.getProperties().containsKey(currentProperty))
 			throw new RuntimeException("Parser error: duplicate window property: " + propName);
 
-		_lastPropertyTable = new PropertyTable(currentProperty.toString());
-		_ref.getProperties().put(currentProperty, _lastPropertyTable);
+		_PropertyTableStack.push(new PropertyTable(currentProperty.toString()));
+		_ref.getProperties().put(currentProperty, _PropertyTableStack.peek());
 	}
 
+	@Override
+	public void unvisit(WindowPropertyNode n) {
+		_PropertyTableStack.pop();
+	}
+	
 	@Override
 	public void visit(WindowSubPropertyNode n) {
 		Tree astNode = n.getTree();
 		String subPropName = nodeToString(astNode.getChild(0));
 		
 		if (subPropName.equalsIgnoreCase("column")) {
-			_lastPropertyTable = new PropertyTable(subPropName.toLowerCase());
+			_PropertyTableStack.push(NULL_TABLE);
+//			_lastPropertyTable = new PropertyTable(subPropName.toLowerCase());
 			return;
 		}
 		
 		// Generic properties
-		if (_lastPropertyTable == null)
+		if (_PropertyTableStack.peek() == NULL_TABLE)
 			return;
 		
 //		if (astNode.getChild(1).getChildCount() > 1)
 //			throw new ParseException("Parser error: multivalue property: " + subPropName, astNode.getLine(), astNode.getCharPositionInLine());
 
 		String value = nodeToString(astNode.getChild(1));
-		_lastPropertyTable.put(subPropName, value);
+		_PropertyTableStack.peek().put(subPropName, value);
 	}
-
+	
+	@Override
+	public void unvisit(WindowSubPropertyNode n) {
+		Tree astNode = n.getTree();
+		String subPropName = nodeToString(astNode.getChild(0));		
+		if (subPropName.equalsIgnoreCase("column"))
+			_PropertyTableStack.pop();
+	}
+	
 	private DataWindow _ref;
-	private PropertyTable _lastPropertyTable = null;
-	private TextLabel _lastTextLabel;
+	private Deque<PropertyTable> _PropertyTableStack = new ArrayDeque<PropertyTable>();
+	//private PropertyTable _lastPropertyTable = null;
 	private Column _lastColumn;
+	// bacause ArrayDeque can not hold real nulls
+	private static PropertyTable NULL_TABLE = new PropertyTable("NULL_TABLE");
 }

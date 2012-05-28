@@ -43,6 +43,8 @@ tokens {
 	SQLSTATEMENT               = 'sqlstatement';
 	
 	WINDOWPROP                 = 'windowprop';
+	WINDOWPROPNAME             = 'windowpropname';
+	WINDOWPROPVAL              = 'windowpropval';	
 	WINDOWSUBPROP              = 'windowsubprop';
 	WINDOWSUBPROPNAME          = 'windowsubpropname'; // windowsubpropname == "retreive" is what you're looking for
 	WINDOWSUBPROPVAL           = 'windowsubpropval';
@@ -124,7 +126,7 @@ window_property
 	 window_property_attributes_sub?
 	 RPAREN
 	)
-	-> ^('windowprop' attribute_name array_decl_sub? LPAREN window_property_attributes_sub? RPAREN)
+	-> ^('windowprop' ^('windowpropname' attribute_name array_decl_sub?) ^('windowpropval' LPAREN window_property_attributes_sub? RPAREN))
 	;
 
 window_property_attributes_sub

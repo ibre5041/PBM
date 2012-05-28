@@ -15,6 +15,13 @@ public class PropertyTable extends HashMap<String, String> {
     	return super.put(key, value);
     }
     
+    public String getUnescaped(String key) {
+    	String retval = get(key);
+    		if( retval.charAt(0) == '\"')
+    			return retval.substring(1, retval.length()-1);
+    	return retval;
+    }
+    
 	@Override
 	public String toString() {
 		StringBuffer b = new StringBuffer(128);

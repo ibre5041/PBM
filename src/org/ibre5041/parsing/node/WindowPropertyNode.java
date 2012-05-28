@@ -7,11 +7,15 @@ public class WindowPropertyNode extends BaseNode {
 	public static NodeTypeEnum TYPE = NodeTypeEnum.WINDOWPROP;
 		
 	@Override
-	public
-	void accept(BaseVisitor v) {
+	public void accept(BaseVisitor v) {
 		v.visit(this);		
 	}
-
+	
+	@Override
+	public void unaccept(BaseVisitor v) {
+		v.unvisit(this);
+	}
+	
 	@Override
 	protected void init(Tree astNode) {
 		this._astNode = astNode;

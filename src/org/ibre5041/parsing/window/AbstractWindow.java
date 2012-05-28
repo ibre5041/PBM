@@ -40,6 +40,13 @@ public abstract class AbstractWindow {
 		for (int i = 0; i < ast.getChildCount(); i++) {
 			walk(ast.getChild(i), visitors, depth + 1);
 		}
+		
+		if (NodeTypeRegistry.getInstance().isRegistered(ast.getType())) {
+			BaseNode n = NodeTypeRegistry.getInstance().create(ast);
+			for (BaseVisitor baseVisitor : visitors) {
+				n.unaccept(baseVisitor);
+			}
+		}		
 	}
 		
 	private String _filename;

@@ -14,6 +14,11 @@ public class WindowSubPropertyNode extends BaseNode{
 	}
 
 	@Override
+	public void unaccept(BaseVisitor v) {
+		v.unvisit(this);		
+	}
+	
+	@Override
 	protected void init(Tree astNode) {
 		this._astNode = astNode;		
 	}

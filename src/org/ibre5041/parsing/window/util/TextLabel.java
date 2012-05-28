@@ -12,11 +12,12 @@ public class TextLabel extends PropertyTable {
 	}
 
     public String put(String key, String value) {
+    	String retval = super.put(key, value);
     	if (key.equalsIgnoreCase("name")) {
     		_parent.addTextLabel(this);
     	}
     	
-    	return super.put(key, value);
+    	return retval;
     }
 
 	private int _x, _y, _w, _h;

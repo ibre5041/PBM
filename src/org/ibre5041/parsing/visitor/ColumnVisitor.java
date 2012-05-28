@@ -15,6 +15,10 @@ public class ColumnVisitor extends BaseVisitor {
 	}
 
 	@Override
+	public void unvisit(WindowPropertyNode n) {	
+	}
+
+	@Override
 	public void visit(WindowSubPropertyNode n) {
 		StringBuffer sb1 =new StringBuffer(16);
 		for(int i=0; i < n.getTree().getChild(0).getChildCount(); i++) {
@@ -31,5 +35,9 @@ public class ColumnVisitor extends BaseVisitor {
 		_ref.put(propName, propVal);
 	}
 
+	@Override
+	public void unvisit(WindowSubPropertyNode n) {
+	}
+	
 	private Column _ref;
 }

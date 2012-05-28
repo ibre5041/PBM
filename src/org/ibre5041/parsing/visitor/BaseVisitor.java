@@ -6,7 +6,9 @@ import org.ibre5041.parsing.window.WindowSubPropertyNode;
 
 public abstract class BaseVisitor {
 	public abstract void visit(WindowPropertyNode n);
+	public abstract void unvisit(WindowPropertyNode n);
 	public abstract void visit(WindowSubPropertyNode n);
+	public abstract void unvisit(WindowSubPropertyNode n);
 	
 	public static String nodeToString(Tree astNode) {
 		StringBuffer sb = new StringBuffer(32);

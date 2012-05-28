@@ -5,6 +5,7 @@ import org.ibre5041.parsing.visitor.BaseVisitor;
 
 public abstract class BaseNode implements Cloneable {
 	public abstract void accept(BaseVisitor v);
+	public abstract void unaccept(BaseVisitor v);
 	
 	
 	protected BaseNode(Tree astNode)
