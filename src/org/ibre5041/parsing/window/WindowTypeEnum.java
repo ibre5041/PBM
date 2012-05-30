@@ -1,6 +1,5 @@
 package org.ibre5041.parsing.window;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 

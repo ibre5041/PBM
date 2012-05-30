@@ -1,6 +1,5 @@
 package org.ibre5041.parsing.window;
 
-import java.util.LinkedList;
 import java.util.List;
 import org.antlr.runtime.tree.Tree;
 import org.ibre5041.parsing.node.BaseNode;

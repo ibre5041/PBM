@@ -3,7 +3,6 @@ package org.ibre5041.painting;
 import java.io.IOException;
 
 import org.antlr.runtime.RecognitionException;
-import org.ibre5041.painting.examples.BurningApp;
 import org.ibre5041.parsing.window.DataWindow;
 import org.ibre5041.parsing.window.Window;
 import org.ibre5041.parsing.window.WindowFactory;

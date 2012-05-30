@@ -1,14 +1,11 @@
 package org.ibre5041.parsing.visitor;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.List;
 
 import org.antlr.runtime.tree.Tree;
 import org.ibre5041.parsing.node.WindowPropertyNode;
-import org.ibre5041.parsing.utils.ParseException;
 import org.ibre5041.parsing.window.AbstractWindow;
 import org.ibre5041.parsing.window.DataWindow;
 import org.ibre5041.parsing.window.WindowSubPropertyNode;
