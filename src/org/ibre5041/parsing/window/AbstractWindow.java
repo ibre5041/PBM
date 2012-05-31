@@ -1,15 +1,22 @@
 package org.ibre5041.parsing.window;
 
+import java.io.File;
 import java.util.List;
 import org.antlr.runtime.tree.Tree;
 import org.ibre5041.parsing.node.BaseNode;
 import org.ibre5041.parsing.node.NodeTypeRegistry;
 import org.ibre5041.parsing.visitor.BaseVisitor;
 
-public abstract class AbstractWindow {
+import com.trolltech.qt.core.QFileInfo;
+
+public abstract class AbstractWindow implements PBFile {
 	
-	public String getFilename() {
+	public File getFilename() {
 		return _filename;
+	}
+	
+	public void setFilename(File filename) {
+		this._filename = filename;
 	}
 	
 	public void setAST(Tree ast) {
@@ -48,6 +55,6 @@ public abstract class AbstractWindow {
 		}		
 	}
 		
-	private String _filename;
+	private File _filename;
 	private Tree _ast;
 }

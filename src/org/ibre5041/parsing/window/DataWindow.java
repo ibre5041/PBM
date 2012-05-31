@@ -20,7 +20,7 @@ import com.trolltech.qt.gui.QColor;
 import com.trolltech.qt.gui.QPainter;
 import com.trolltech.qt.gui.QPen;
 
-public class DataWindow extends AbstractWindow implements Window {
+public class DataWindow extends AbstractWindow implements PBFile {
 
 	public enum PropertyTableTypeEnum {
 		DATAWINDOW("datawindow"), 
