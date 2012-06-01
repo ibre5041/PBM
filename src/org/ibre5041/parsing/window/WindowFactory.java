@@ -61,7 +61,8 @@ public class WindowFactory {
 
 			if (parser.getNumberOfSyntaxErrors() != 0) {
 				// TODO THROW SOMETHING HERE
-				System.exit(1);
+				//System.exit(1);
+				return null;
 			}
 
 			Tree t = (Tree) AST.getTree();

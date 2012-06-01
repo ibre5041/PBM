@@ -89,14 +89,12 @@ public class List1 extends QMainWindow {
 
 	@SuppressWarnings("unused")
 	private void appendData(PBFile newData) {
-		System.out.println("appendData(): " + newData);
 		FileListModel m = (FileListModel) ui.listView.model();
 		m.addpendRow(newData);
 	}
 
 	@SuppressWarnings("unused")
 	private void appendDataVector(Vector<PBFile> newData) {
-		System.out.println("appendData(): " + newData);
 		FileListModel m = (FileListModel) ui.listView.model();
 		m.addpendRows(newData);
 	}

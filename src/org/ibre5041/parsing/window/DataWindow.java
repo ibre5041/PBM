@@ -16,7 +16,9 @@ import org.ibre5041.parsing.window.util.TextLabel;
 import com.trolltech.qt.core.QRect;
 import com.trolltech.qt.core.Qt;
 import com.trolltech.qt.core.Qt.GlobalColor;	
+import com.trolltech.qt.gui.QApplication;
 import com.trolltech.qt.gui.QColor;
+import com.trolltech.qt.gui.QFontMetrics;
 import com.trolltech.qt.gui.QPainter;
 import com.trolltech.qt.gui.QPen;
 
@@ -53,6 +55,18 @@ public class DataWindow extends AbstractWindow implements PBFile {
 		}
 	}
 
+	public enum DimesionUnitType {
+		PB(0),
+		PIXEL(1),
+		INCH(2),
+		CM(3);
+		
+		DimesionUnitType(int value) {
+			this._value = value;
+		}		
+		private int _value;
+	}
+	
 	@Override
 	public void setAST(Tree ast) {
 		super.setAST(ast);
@@ -172,7 +186,7 @@ public class DataWindow extends AbstractWindow implements PBFile {
 		PropertyTable f = getProperty(e);
 		if (f == null)
 			return;
-		int height = Integer.parseInt( f.get("height"));
+		int height = (int) ((int)Integer.parseInt( f.get("height")) * _div_y);
 		if (height == 0)
 			return;		
 		painter.drawRect(0, _y + 0, _width, height);
@@ -186,8 +200,8 @@ public class DataWindow extends AbstractWindow implements PBFile {
 		for (PropertyTable tl : _ltexts) {
 			if( !tl.get("band").equalsIgnoreCase(band))
 				continue;
-			int x = Integer.parseInt( tl.getUnescaped("x"));					
-			int y = Integer.parseInt( tl.getUnescaped("y"));
+			int x = (int) (Integer.parseInt( tl.getUnescaped("x")) * _div_x);					
+			int y = (int) (Integer.parseInt( tl.getUnescaped("y")) * _div_y);
 			int textHeight = Integer.parseInt( tl.getUnescaped("font.height"));
 			painter.drawText(x, _y + y - textHeight, tl.getUnescaped("text"));
 		}
@@ -198,12 +212,24 @@ public class DataWindow extends AbstractWindow implements PBFile {
 		for (PropertyTable tl : _lcolumns) {
 			if( !tl.get("band").equalsIgnoreCase(band))
 				continue;
-			int x = Integer.parseInt( tl.getUnescaped("x"));					
-			int y = Integer.parseInt( tl.getUnescaped("y"));
+			int x = (int) (Integer.parseInt( tl.getUnescaped("x")) * _div_x);					
+			int y = (int) (Integer.parseInt( tl.getUnescaped("y")) * _div_y);
 			int textHeight = Integer.parseInt( tl.getUnescaped("font.height"));
 			painter.drawText(x, _y + y - textHeight, tl.getUnescaped("name"));
 		}
 	}
 	
 	private int _width, _y;
+	private static float _div_x, _div_y;
+	
+	//
+	// All window measurements are in PowerBuilder units. 
+	// Using these units, you can build applications that look similar on different resolution screens. 
+	// A horizontal PowerBuilder unit is 1/32 of the width of an average character in the system font. 
+	// A vertical PowerBuilder unit is 1/64 of the system font height. 
+	static {
+		QFontMetrics m = QApplication.fontMetrics();
+		_div_x = (float)m.width("x") / 32;
+		_div_y = (float) m.height() / 64;
+	}
 }
