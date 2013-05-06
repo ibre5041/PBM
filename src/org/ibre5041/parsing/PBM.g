@@ -92,7 +92,6 @@ body_rule
 	| global_variables_decl        -> ^('datatypedecl' global_variables_decl)
 	| variable_decl                -> ^('variabledecl' variable_decl)
 	| constant_decl                -> ^('constantdecl' constant_decl)
-	| function_forward_decl        -> ^('functionforwarddecl' function_forward_decl)
 	| functions_forward_decl       -> ^('functionsforwarddecl' functions_forward_decl)
 	| function_body                -> ^('functionbody' function_body)
 	| on_body                      -> ^('onbody' on_body)
@@ -285,13 +284,13 @@ function_body
 	LPAREN
 	parameters_list_sub?
 	RPAREN 	('THROWS' identifier_name)?
-	SEMI
+	(SEMI | delim)
 	(statement)*
 	'END' ('FUNCTION'|'SUBROUTINE') delim
 	;
 	
 on_body
-	: 'ON' (identifier | 'OPEN' | 'CLOSE') 
+	: 'ON' (identifier (DOT identifier)? | 'OPEN' | 'CLOSE')
 	// Ugly hack:
 	// on ue_postopen;setpointer(Hourglass!)
 	// on itemfocuschanged;IF ib_import THEN return

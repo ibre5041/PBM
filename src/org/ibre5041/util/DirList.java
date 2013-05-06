@@ -18,17 +18,33 @@ public class DirList {
 
 	public static List<File> listDirectory(String dir)
 	{
-		File folder = new File(dir);
-		File[] listOfFiles = folder.listFiles();
 		List<File> retval = new ArrayList<File>();
+		File folder = new File(dir);
+		if(folder.isFile())
+		{
+			retval.add(folder);
+			return retval;
+		}
+
+		File[] listOfFiles = folder.listFiles();
 
 		for (File file : listOfFiles)
-			for (String suffix : suffixes)
-				if (file.getPath().endsWith(suffix) == true) {
-					retval.add(file);
-					break;
-				}					
-													
-		    return retval;
-	}	
+		{
+			if (file.isFile())
+				for (String suffix : suffixes)
+				{
+					if( file.getPath().endsWith(suffix) == true)
+					{
+						retval.add(file);
+						break;
+					}
+				}
+
+			if (file.isDirectory())
+				retval.addAll(listDirectory(file.getPath()));
+		}
+
+		return retval;
+	}
+
 }

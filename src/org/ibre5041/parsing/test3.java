@@ -27,6 +27,7 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.runtime.tree.Tree;
 
 import org.ibre5041.parsing.utils.ANTLRNoCaseFileStream;
+import org.ibre5041.util.DirList;
 
 public class test3 {
 
@@ -35,9 +36,9 @@ public class test3 {
 	 */
 	public static void main(String[] args) {
  
-		List<File> files = listDirectory(args[0]);
+		List<File> files = DirList.listDirectory(args[0]);
 		Collections.sort(files);		
-		for (File file: listDirectory(args[0]))
+		for (File file: files)
 		{
 			String name = file.getName();
 //			if(name.startsWith("r_"))
@@ -45,28 +46,6 @@ public class test3 {
 				parse(file.getPath());
 //			}
 		}
-	}
-	
-	private static final List<String> suffixes;
-		
-	static {
-		suffixes = Arrays.asList(".sra", ".srd", ".srf", ".srj", ".srm", ".srq", ".srs", ".sru", ".srw");
-	}
-
-	public static List<File> listDirectory(String dir)
-	{
-		File folder = new File(dir);
-		File[] listOfFiles = folder.listFiles();
-		List<File> retval = new ArrayList<File>();
-
-		for (File file : listOfFiles)
-			for (String suffix : suffixes)
-				if (file.getPath().endsWith(suffix) == true) {
-					retval.add(file);
-					break;
-				}					
-													
-		    return retval;
 	}
 	
 	public static void parse(String file) {

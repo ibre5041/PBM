@@ -10,7 +10,7 @@ public enum WindowTypeEnum {
 	DATA_WINDOW("srd"),
 	FUNCTION("srf"),
 	PIPELINE("srp"),
-	PROJECT("srj"),
+	//PROJECT("srj"),
 	MENU("srm"),
 	QUERY("srq"),
 	STRUCT("srs"),
