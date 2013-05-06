@@ -260,7 +260,7 @@ function_forward_decl
 
 parameter_sub
 	:
-		('READONLY')? ('REF')? data_type_name decimal_decl_sub? identifier_name array_decl_sub?
+		('READONLY')? ('REF')? data_type_name decimal_decl_sub? identifier_name_ex array_decl_sub?
 	;
 
 parameters_list_sub
@@ -271,7 +271,7 @@ parameters_list_sub
 functions_forward_decl
 	:
 		('FORWARD'|'TYPE') 'PROTOTYPES' delim
-		function_forward_decl+
+		(access_modif | function_forward_decl)*
 		'END' 'PROTOTYPES' delim
 	;
 	
@@ -420,6 +420,7 @@ statement
 
 statement_sub
 		: (function_virtual_call_expression_sub) => function_virtual_call_expression_sub
+		| (post_event_sub) => post_event_sub		
 		| (function_call_expression_sub) => function_call_expression_sub
 		| (return_sub) => return_sub
 		| (open_call_sub) => open_call_sub
@@ -430,7 +431,9 @@ statement_sub
 		| (destroy_call_sub) => destroy_call_sub
 		| (continue_sub) => continue_sub
 		| (goto_stat_sub) => goto_stat_sub				
-		| (assignment_sub) => assignment_sub 
+		| (assignment_sub) => assignment_sub
+		| exit_statement_sub
+		| atom
 		;
 			
 assignment_sub
@@ -538,7 +541,7 @@ for_loop_statement
 		:
 			'FOR' lvalue_sub '=' expression 'TO' expression ('STEP' expression)? delim
 			statement*
-			'NEXT' delim
+			( 'NEXT' delim | 'END' 'FOR' delim)
 		;
 
 do_while_loop_statement
@@ -569,7 +572,7 @@ if_statement
 
 // NOTE this one is single liner (all statements end with delim)
 if_simple_statement
-		: 'IF' boolean_expression 'THEN' statement
+		: 'IF' boolean_expression 'THEN' statement_sub ('ELSE' statement_sub)? (SEMI | delim)
 		;
 
 continue_sub
@@ -583,9 +586,13 @@ continue_statement
 // ldir.Post Event SelectionChanged(1)		
 post_event_sub
 		: 
+//		( atom_sub_member1 DOT)?
+//		('POST' | 'TRIGGER') ('EVENT')? ('DYNAMIC')?
+//		identifier_name_ex LPAREN expression_list? RPAREN
+		
 		( atom_sub_member1 DOT)?
-		('POST' | 'TRIGGER') ('EVENT')? ('DYNAMIC')?
-		identifier_name_ex LPAREN expression_list? RPAREN
+		('FUNCTION'|'EVENT')? ('STATIC'|'DYNAMIC')? ('POST' | 'TRIGGER')
+		identifier_name_ex LPAREN expression_list? RPAREN		
 		;
 
 post_event
@@ -679,6 +686,8 @@ sql_statement
 		( 'COMMIT' | 'CONNECT' | 'ROLLBACK' | 'DISCONNECT' ) SEMI // delim
 		| // Strange ones (NOTE: Here we handle presence of the function describe(String s)) 
 		( 'DESCRIBE' identifier_name identifier_name identifier_name ) SEMI // delim
+		|
+		( 'EXECUTE' identifier_name) SEMI
 		;
 						
 identifier
@@ -938,8 +947,21 @@ NEWLINE
 					break;
 				if(c.equals(";"))
 					break;					
-				if(c.equals("/") && p.equals("*"))
-					break;
+				if(p.equals("*") && c.equals("/") && pos >= 4)
+				{
+				  pos--;
+					while(pos-- >= 1)
+					{
+						c = input.substring(pos, pos);
+						p = input.substring(pos-1, pos-1);
+						if(p.equals("/") && c.equals("*"))
+						{
+						  pos--;
+						  break;
+						}											
+					}
+					continue;
+				}					
 				if(!c.equals(" ") && !c.equals("\t"))
 				{
 					textFound = true;
