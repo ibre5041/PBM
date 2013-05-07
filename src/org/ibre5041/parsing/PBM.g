@@ -67,7 +67,7 @@ public void emit(Token token) {
 public Token nextToken() {
 		super.nextToken();
 		if ( tokens.size()==0 ) {
-				return Token.EOF_TOKEN;
+				return super.getEOFToken();
 		}
 		return (Token)tokens.remove(0);
 }
@@ -338,7 +338,8 @@ scope_modif
     
 // value expressions
 expression
-    : (close_call_sub) => close_call_sub                     // TODO should is be an atom?    
+    : (close_call_sub) => close_call_sub                     // TODO should is be an atom?
+    | (update_call_sub) => update_call_sub                     // TODO should is be an atom?
     | ('{') => '{' expression_list '}'
 		| ('CREATE') => create_call_sub
 		| boolean_expression
@@ -424,6 +425,7 @@ statement_sub
 		| (function_call_expression_sub) => function_call_expression_sub
 		| (return_sub) => return_sub
 		| (open_call_sub) => open_call_sub
+		| (update_call_sub) => update_call_sub
 		| (close_call_sub) => close_call_sub
 		| (variable_decl_sub) => variable_decl_sub		
 		| (super_call_sub) => super_call_sub
@@ -484,7 +486,11 @@ function_virtual_call_expression_sub
 		;
 
 open_call_sub
-		: 'OPEN' LPAREN expression_list RPAREN
+		: 'OPEN' LPAREN expression_list? RPAREN
+		;
+
+update_call_sub
+		: 'UPDATE' LPAREN expression_list? RPAREN
 		;
 		
 close_call_sub
@@ -493,7 +499,7 @@ close_call_sub
 		;
 		
 function_call_statement
-		: ( function_call_expression_sub | function_virtual_call_expression_sub | open_call_sub | close_call_sub)
+		: ( function_call_expression_sub | function_virtual_call_expression_sub | open_call_sub | update_call_sub | close_call_sub)
 			delim
 		;
 
@@ -589,9 +595,12 @@ post_event_sub
 //		( atom_sub_member1 DOT)?
 //		('POST' | 'TRIGGER') ('EVENT')? ('DYNAMIC')?
 //		identifier_name_ex LPAREN expression_list? RPAREN
-		
+		// Note: this should not be possible:
+		// d.Post Event SelectionChanged(1)
+		// While this correct:
+		// This.EVENT POST DoubleClicked(xpos, ypos, row, dwo)
 		( atom_sub_member1 DOT)?
-		('FUNCTION'|'EVENT')? ('STATIC'|'DYNAMIC')? ('POST' | 'TRIGGER')
+		('FUNCTION'|'EVENT')? ('STATIC'|'DYNAMIC')? ('POST' | 'TRIGGER') ('FUNCTION'|'EVENT')? ('STATIC'|'DYNAMIC')?
 		identifier_name_ex LPAREN expression_list? RPAREN		
 		;
 
@@ -674,11 +683,12 @@ throw_stat
 
 sql_statement
 		: // NOTE: since the SQL statement ends with SEMI, a newline(delim) is on the HIDDEN channel
+		( ('OPEN'|'CLOSE'|'UPDATE') ~(LPAREN) ) => ('OPEN'|'CLOSE'|'UPDATE') swallow_to_semi SEMI
+		|
 		( // Long ones
-			('SELECT' | 'SELECTBLOB' |
-			'UPDATE' | 'UPDATEBLOB' | 'INSERT' | 'MERGE' | 'DELETE' | 'PREPARE' |
+			('SELECT' | 'SELECTBLOB' | 'UPDATEBLOB' | 'INSERT' | 'MERGE' | 'DELETE' | 'PREPARE' |
 			'EXECUTE' 'IMMEDIATE' |
-			'DECLARE' | 'CLOSE' | 'FETCH' | 'OPEN' |			
+			'DECLARE' | 'FETCH' |
 			'COMMIT'| 'ROLLBACK' | 'CONNECT' | 'DISCONNECT' ) 
 			swallow_to_semi SEMI // delim
 		)
@@ -996,10 +1006,7 @@ EXPORT_HEADER
 	;
 
 PBSELECT
-	: p=('PBSELECT' ~('\n'|'\r')*) 
-	{
-		
-	}
+	: ('PBSELECT' ~('\n'|'\r')*)
 	;
 	
 DATE // 1996-09-26
