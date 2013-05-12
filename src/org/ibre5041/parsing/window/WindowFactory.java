@@ -24,17 +24,20 @@ public class WindowFactory {
 		Window window = null;
 
 		if (!file.exists()) {
-			throw new RuntimeException("File does not exist: " + filename);		
+			throw new RuntimeException("File does not exist: " + filename);
 		}
 
 		Tree AST = parse(filename);
-		
+
 		switch (WindowTypeEnum.enumFromSuffix(file.suffix())) {
 		case APP:
-			window = new AppWindow();			
+			window = new AppWindow();
 			break;
 		case DATA:
 			window = new DataWindow();
+			break;
+		case WINOBJ:
+			window = new ObjectWindow();
 			break;
 		default:
 			throw new RuntimeException("Unsupported file suffix: " + file.suffix());
@@ -44,8 +47,7 @@ public class WindowFactory {
 		return window;
 	}
 
-	private final Tree parse(String filename) throws IOException,
-			RecognitionException {
+	private final Tree parse(String filename) throws IOException, RecognitionException {
 		try {
 			PBMLexer lex = new PBMLexer(new ANTLRNoCaseFileStream(filename));
 			CommonTokenStream tokens = new CommonTokenStream(lex);
@@ -53,8 +55,7 @@ public class WindowFactory {
 
 			PBMParser.start_rule_return AST = parser.start_rule();
 
-			System.err.println(filename + ": "
-					+ parser.getNumberOfSyntaxErrors());
+			System.err.println(filename + ": " + parser.getNumberOfSyntaxErrors());
 
 			if (parser.getNumberOfSyntaxErrors() != 0) {
 				// TODO THROW SOMETHING HERE

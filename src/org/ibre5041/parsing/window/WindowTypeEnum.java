@@ -6,7 +6,8 @@ import java.util.HashMap;
 public enum WindowTypeEnum {
 	//suffixes = Arrays.asList(".sra", ".srd", ".srf", ".srj", ".srm", ".srq", ".srs", ".sru", ".srw");
 	APP("sra"),
-	DATA("srd");
+	DATA("srd"),
+	WINOBJ("srw");
 	
 	public String getSuffix() {
 		return _suffix;		
