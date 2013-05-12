@@ -1,10 +1,11 @@
 package org.ibre5041.painting;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.antlr.runtime.RecognitionException;
 import org.ibre5041.parsing.window.DataWindow;
-import org.ibre5041.parsing.window.Window;
+import org.ibre5041.parsing.window.PBFile;
 import org.ibre5041.parsing.window.WindowFactory;
 
 import com.trolltech.qt.gui.QApplication;
@@ -14,8 +15,8 @@ import com.trolltech.qt.gui.QWidget;
 
 public class PaintText1 extends QWidget {
 
-    public PaintText1(Window window) {
-        this._window = window;
+    public PaintText1(PBFile window) {
+        this._pbfile = window;
         
         setWindowTitle("PaintText1");
 
@@ -28,7 +29,7 @@ public class PaintText1 extends QWidget {
 
         QPainter painter = new QPainter(this);
         //drawPatterns(painter);
-        _window.paint(painter);
+        _pbfile.paint(painter);
     }    
 	/**
 	 * @param args
@@ -37,7 +38,7 @@ public class PaintText1 extends QWidget {
 		try {
 	        QApplication.initialize(args);						
 			
-			Window window = WindowFactory.getInstance().createWindow(args[0]);
+			PBFile window = WindowFactory.getInstance().createWindow(new File(args[0]));
 			if( window instanceof DataWindow)
 			{
 				System.out.println( ((DataWindow)window).getSQL());
@@ -54,5 +55,5 @@ public class PaintText1 extends QWidget {
 		}
  	}
 	
-	private Window _window;
+	private PBFile _pbfile;
 }

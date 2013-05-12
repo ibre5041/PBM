@@ -9,7 +9,7 @@ DATE:
 		DEC 2011
 NOTES:
 		target language Java
-		antlr version 3.4
+		antlr version 3.5
 *******************************************************************************/
 
 grammar PBM;
@@ -67,10 +67,14 @@ public void emit(Token token) {
 public Token nextToken() {
 		super.nextToken();
 		if ( tokens.size()==0 ) {
-				return Token.EOF_TOKEN;
+				return super.getEOFToken();
 		}
 		return (Token)tokens.remove(0);
 }
+}
+
+@parser::members {
+
 }
 
 start_rule
@@ -92,7 +96,6 @@ body_rule
 	| global_variables_decl        -> ^('datatypedecl' global_variables_decl)
 	| variable_decl                -> ^('variabledecl' variable_decl)
 	| constant_decl                -> ^('constantdecl' constant_decl)
-	| function_forward_decl        -> ^('functionforwarddecl' function_forward_decl)
 	| functions_forward_decl       -> ^('functionsforwarddecl' functions_forward_decl)
 	| function_body                -> ^('functionbody' function_body)
 	| on_body                      -> ^('onbody' on_body)
@@ -152,9 +155,18 @@ attribute_name
 	( DOT ( identifier_name | 'CASE' | 'TYPE' | 'ON' | 'DYNAMIC') )*
 	;
 
+fragment
+attribute_sub_call
+    : identifier_name LPAREN expression_list? RPAREN
+    ;
+fragment    
+attribute_sub_member    
+    :  identifier_name
+    ;
+
 attribute_value
-    : (atom_sub_call1) => atom_sub_call1
-    | (atom_sub_member1) => atom_sub_member1    
+    : (attribute_sub_call) => attribute_sub_call
+    | (attribute_sub_member) => attribute_sub_member    
     | ('-')? numeric_atom
     | boolean_atom
     | ENUM
@@ -162,7 +174,7 @@ attribute_value
     | QUOTED_STRING
     | DATE
     | TIME
-    | 'TYPE' | 'TO' | 'FROM' | 'REF' | 'NULL' | 'OPEN'
+    | 'TYPE' | 'TO' | 'FROM' | 'REF' | 'NULL' | T_OPEN | 'EVENT'
     | LPAREN 
 					LPAREN (expression | data_type_sub ) (COMMA (expression| data_type_sub))? RPAREN
 					(COMMA LPAREN (expression | data_type_sub ) (COMMA (expression | data_type_sub))? RPAREN)* 
@@ -237,7 +249,7 @@ array_decl_sub
 
 constant_decl_sub
     : // TODO '=' is mandatory for constants
-        'CONSTANT' variable_decl_sub
+    		access_modif_part? 'CONSTANT' variable_decl_sub
     ;   
 
 constant_decl
@@ -254,14 +266,14 @@ function_forward_decl
 	parameters_list_sub?
 	RPAREN
 	('LIBRARY' (DQUOTED_STRING|QUOTED_STRING) ('ALIAS' 'FOR' (DQUOTED_STRING|QUOTED_STRING) )? )?
-	('RPCFUNC' 'ALIAS' 'FOR' (DQUOTED_STRING|QUOTED_STRING) )?
+	('RPCFUNC' ('ALIAS' 'FOR' (DQUOTED_STRING|QUOTED_STRING))? )?
 	('THROWS' identifier_name)?
 	delim
 	;
 
 parameter_sub
 	:
-		('READONLY')? ('REF')? data_type_name decimal_decl_sub? identifier_name array_decl_sub?
+		('READONLY')? ('REF')? data_type_name decimal_decl_sub? identifier_name_ex array_decl_sub?
 	;
 
 parameters_list_sub
@@ -272,7 +284,7 @@ parameters_list_sub
 functions_forward_decl
 	:
 		('FORWARD'|'TYPE') 'PROTOTYPES' delim
-		function_forward_decl+
+		(access_modif | function_forward_decl)*
 		'END' 'PROTOTYPES' delim
 	;
 	
@@ -285,17 +297,24 @@ function_body
 	LPAREN
 	parameters_list_sub?
 	RPAREN 	('THROWS' identifier_name)?
-	SEMI
+	(SEMI | delim)
 	(statement)*
 	'END' ('FUNCTION'|'SUBROUTINE') delim
 	;
-	
+
+fragment
+event_name_sub
+	: T_OPEN | T_CLOSE | 'DESTROY' | 'CREATE'
+	;
+event_name
+	: event_name_sub | identifier_name
+	;
 on_body
-	: 'ON' (identifier | 'OPEN' | 'CLOSE') 
+	: 'ON' event_name ( (DOT|FOUR_DOTS) event_name)?
 	// Ugly hack:
 	// on ue_postopen;setpointer(Hourglass!)
 	// on itemfocuschanged;IF ib_import THEN return
-	(SEMI | delim)
+	delim
 	(statement)*
 	'END' 'ON' delim
 	;
@@ -311,7 +330,7 @@ event_forward_decl
 	
 event_body
 	// Ugly hack on event dw_summary::doubleclicked;call super::doubleclicked;long ll_row
-	: 'EVENT' NEWLINE? ('TYPE' data_type_name)? (identifier_name '::')? (identifier_name | 'OPEN' | 'CLOSE')
+	: 'EVENT' NEWLINE? ('TYPE' data_type_name)? (identifier_name '::')? (identifier_name | T_OPEN | T_CLOSE)
 	(LPAREN parameters_list_sub? RPAREN)?
 	SEMI
 	(statement)*	
@@ -339,8 +358,7 @@ scope_modif
     
 // value expressions
 expression
-    : (close_call_sub) => close_call_sub                     // TODO should is be an atom?    
-    | ('{') => '{' expression_list '}'
+    : ('{') => '{' expression_list '}'
 		| ('CREATE') => create_call_sub
 		| boolean_expression
     ;
@@ -383,7 +401,7 @@ mul_expr
 
 unary_sign_expr
     : (LPAREN expression RPAREN) => (LPAREN expression RPAREN)
-    | ('-' | '+')? atom	
+    | ('-' | '+')? atom
     ;
     
 
@@ -391,14 +409,9 @@ unary_sign_expr
 statement
 		:
 		(if_simple_statement) => if_simple_statement                 -> ^('statement' if_simple_statement)
-		| ('DESCRIBE' identifier_name)	=> sql_statement             -> ^('sqlstatement' sql_statement)
 		| (assignment_statement) => assignment_statement             -> ^('statement' assignment_statement)
-		| (statement_sub SEMI) => (statement_sub SEMI)               -> ^('statement' statement_sub)
 		| (if_statement) => if_statement                             -> ^('statement' if_statement)
 		| ('TRY') => try_catch_block                                 -> ^('statement' try_catch_block)
-		| (post_event) => post_event                                 -> ^('statement' post_event)
-		| (function_call_statement) => function_call_statement       -> ^('statement' function_call_statement)
-		| (event_call_statement) => (event_call_statement)           -> ^('statement' event_call_statement)
 		| (constant_decl) => constant_decl                           -> ^('statement' constant_decl)
 		| (variable_decl) => variable_decl                           -> ^('statement' variable_decl)
 		| (super_call_statement) => super_call_statement             -> ^('statement' super_call_statement)
@@ -407,37 +420,58 @@ statement
 		| (create_call_statement) => (create_call_statement)         -> ^('statement' create_call_statement)
 		| (destroy_call_statement) => (destroy_call_statement)       -> ^('statement' destroy_call_statement)
 		| (label_stat) => label_stat                                 -> ^('statement' label_stat)
-		| (identifier delim) => identifier delim                     -> ^('statement' identifier)
+		| {(input.LA(1)==T_OPEN||input.LA(1)== T_CLOSE||input.LA(1)== T_UPDATE|input.LA(1)== T_DESCRIBE)&& input.LA(2)==LPAREN}?
+				atom delim                                                 -> ^('statement' atom)
+		|	{   
+				input.LA(1)==T_CLOSE      ||
+				input.LA(1)==T_COMMIT     ||
+				input.LA(1)==T_CONNECT    ||
+				input.LA(1)==T_DECLARE    ||
+				input.LA(1)==T_DELETE     ||
+				input.LA(1)==T_DESCRIBE   ||
+				input.LA(1)==T_DISCONNECT ||
+				input.LA(1)==T_EXECUTE    ||
+				input.LA(1)==T_FETCH      ||
+				input.LA(1)==T_IMMEDIATE  ||
+				input.LA(1)==T_INSERT     ||
+				input.LA(1)==T_MERGE      ||
+				input.LA(1)==T_OPEN       ||
+				input.LA(1)==T_PREPARE    ||
+				input.LA(1)==T_ROLLBACK   ||
+				input.LA(1)==T_SELECT     ||
+				input.LA(1)==T_SELECTBLOB ||
+				input.LA(1)==T_UPDATE     ||
+				input.LA(1)==T_UPDATEBLOB
+			}?
+			sql_statement                                              -> ^('sqlstatement' sql_statement)
 		| throw_stat                                                 -> ^('statement' throw_stat)
-		| goto_stat                                                  -> ^('statement' goto_stat)
-		| sql_statement                                              -> ^('sqlstatement' sql_statement) 
+		| goto_stat                                                  -> ^('statement' goto_stat) 
 		| choose_statement                                           -> ^('statement' choose_statement)
 		| return_statement                                           -> ^('statement' return_statement)
 		| for_loop_statement                                         -> ^('statement' for_loop_statement)
 		| continue_statement                                         -> ^('statement' continue_statement)
 		| exit_statement                                             -> ^('statement' exit_statement)
+		| halt_statement_sub delim		                               -> ^('statement' halt_statement_sub)
 		| atom delim                                                 -> ^('statement' atom)
 		;
 
 statement_sub
-		: (function_virtual_call_expression_sub) => function_virtual_call_expression_sub
-		| (function_call_expression_sub) => function_call_expression_sub
-		| (return_sub) => return_sub
-		| (open_call_sub) => open_call_sub
-		| (close_call_sub) => close_call_sub
+		: (return_sub) => return_sub
 		| (variable_decl_sub) => variable_decl_sub		
 		| (super_call_sub) => super_call_sub
 		| (create_call_sub) => create_call_sub
 		| (destroy_call_sub) => destroy_call_sub
 		| (continue_sub) => continue_sub
 		| (goto_stat_sub) => goto_stat_sub				
-		| (assignment_sub) => assignment_sub 
+		| (assignment_sub) => assignment_sub
+		| exit_statement_sub
+		| halt_statement_sub
+		| atom
 		;
-			
+		
 assignment_sub
     :
-        /* TODO lvalue */                              /* TODO expression */
-        lvalue_sub ( '=' | '+=' | '-=' | '*=' | '/=' )
+        lvalue_sub ( ('[]')? '=' | '+=' | '-=' | '*=' | '/=' )
         (
         ('NOT') => boolean_expression
         | ('{') => '{' expression_list '}' // NOTE: this is an array assignment TOO
@@ -446,20 +480,15 @@ assignment_sub
         )
     ;
 assignment_statement
-		: assignment_sub SEMI? delim
+		: assignment_sub delim
 		;
 		
 lvalue_sub
-    : (atom_sub (DOT identifier_name_ex)) =>
-    (
-    	atom_sub (DOT identifier_name_ex (LPAREN expression_list? RPAREN)? ('[' expression_list ']')?)+ ('[]')?
-    )      
-    | (atom_sub_call1) => atom_sub_call1
-    | (atom_sub_array1) => atom_sub_array1
-    | (atom_sub_ref1) => atom_sub_ref1    
-    | (atom_sub_member1) => atom_sub_member1 	
-     	
-		;	
+		: identifier_name (atom_array_access_suffix|atom_call_suffix)?
+		(
+			DOT identifier_name_ex (atom_array_access_suffix|atom_call_suffix)?
+		)*		
+		;
 		
 return_sub
 		: 'RETURN' expression?
@@ -469,56 +498,34 @@ return_statement
 		: return_sub delim
 		;		
 		
-function_call_expression_sub
-		: (atom_sub (DOT identifier_name_ex)) => atom_sub (DOT identifier_name_ex (LPAREN expression_list? RPAREN))+ 
-		| atom_sub_call1
-		;			
-
-function_virtual_call_expression_sub 
-// 	lw_sheet.Event Dynamic ue_show(Checked)
-//	dw_sheet.Dynamic Event ue_select()
-		: identifier_name DOT 'DYNAMIC' ('EVENT')? function_call_expression_sub
-		| identifier_name DOT 'EVENT' 'DYNAMIC' function_call_expression_sub
+open_call_sub
+		: T_OPEN LPAREN expression_list? RPAREN
 		;
 
-open_call_sub
-		: 'OPEN' LPAREN expression_list RPAREN
+update_call_sub
+		: 'UPDATE' LPAREN expression_list? RPAREN
 		;
 		
 close_call_sub
-		:	'CLOSE' LPAREN expression_list RPAREN
-		| 'HALT' 'CLOSE'
+		:	T_CLOSE LPAREN expression_list? RPAREN
+		;
+
+describe_call_sub
+		:	T_DESCRIBE LPAREN expression_list? RPAREN
 		;
 		
-function_call_statement
-		: ( function_call_expression_sub | function_virtual_call_expression_sub | open_call_sub | close_call_sub)
-			delim
+halt_statement_sub
+		: 'HALT' T_CLOSE
 		;
 
 super_call_sub
-		: 'CALL' 
-		(identifier_name '`')? 
-		( 
-			(atom_sub_call1) => atom_sub_call1 
-			|atom_sub_member1
-		)
+		: 'CALL' identifier_name ('`' identifier_name)? FOUR_DOTS event_name 
 		;
 
 super_call_statement
 		: super_call_sub delim
 		;
 
-event_call_statement_sub // li_rc = dw_action.Event ue_value_changed(1,1)
-		: 
-		( (identifier_name DOT (identifier_name DOT)?) | ('SUPER' '::') )? 		
-		'EVENT' 
-		atom_sub_call1
-		;
-		
-event_call_statement
-		:	event_call_statement_sub delim
-		;
-		
 create_call_sub
 		: 'CREATE' ('USING')? (identifier_name DOT)? data_type_name	(LPAREN expression_list? RPAREN)?
 		;
@@ -528,7 +535,7 @@ create_call_statement
 		;	
 
 destroy_call_sub
-		: 'DESTROY' expression	
+		: 'DESTROY' atom	
 		;
 		
 destroy_call_statement
@@ -539,7 +546,7 @@ for_loop_statement
 		:
 			'FOR' lvalue_sub '=' expression 'TO' expression ('STEP' expression)? delim
 			statement*
-			'NEXT' delim
+			( 'NEXT' delim | 'END' 'FOR' delim)
 		;
 
 do_while_loop_statement
@@ -570,7 +577,7 @@ if_statement
 
 // NOTE this one is single liner (all statements end with delim)
 if_simple_statement
-		: 'IF' boolean_expression 'THEN' statement
+		: 'IF' boolean_expression 'THEN' statement_sub ('ELSE' statement_sub)? (SEMI | delim)
 		;
 
 continue_sub
@@ -581,18 +588,6 @@ continue_statement
 		: continue_sub delim
 		;
 
-// ldir.Post Event SelectionChanged(1)		
-post_event_sub
-		: 
-		( atom_sub_member1 DOT)?
-		('POST' | 'TRIGGER') ('EVENT')? ('DYNAMIC')?
-		identifier_name_ex LPAREN expression_list? RPAREN
-		;
-
-post_event
-		: post_event_sub delim
-		;
-		
 exit_statement_sub
 		: 'EXIT'		
 		;
@@ -668,27 +663,22 @@ throw_stat
 
 sql_statement
 		: // NOTE: since the SQL statement ends with SEMI, a newline(delim) is on the HIDDEN channel
-		( // Long ones
-			('SELECT' | 'SELECTBLOB' |
-			'UPDATE' | 'UPDATEBLOB' | 'INSERT' | 'MERGE' | 'DELETE' | 'PREPARE' |
+		(T_OPEN|T_CLOSE|'UPDATE') swallow_to_semi SEMI		
+		| // Long ones
+		(  
+			('SELECT' | 'SELECTBLOB' | 'UPDATEBLOB' | 'INSERT' | 'MERGE' | 'DELETE' | 'PREPARE' |
 			'EXECUTE' 'IMMEDIATE' |
-			'DECLARE' | 'CLOSE' | 'FETCH' | 'OPEN' |			
+			'DECLARE' | 'FETCH' |
 			'COMMIT'| 'ROLLBACK' | 'CONNECT' | 'DISCONNECT' ) 
 			swallow_to_semi SEMI // delim
 		)
 		| // Short ones
 		( 'COMMIT' | 'CONNECT' | 'ROLLBACK' | 'DISCONNECT' ) SEMI // delim
 		| // Strange ones (NOTE: Here we handle presence of the function describe(String s)) 
-		( 'DESCRIBE' identifier_name identifier_name identifier_name ) SEMI // delim
+		( T_DESCRIBE identifier_name identifier_name identifier_name ) SEMI // delim
+		|
+		( 'EXECUTE' identifier_name) SEMI
 		;
-						
-identifier
-    :   identifier_name 
-    |		'SUPER' '::' ('CREATE' | 'DESTROY' | identifier_name_ex)
-    |		identifier_name '::' ('CREATE' | 'DESTROY')
-    |		identifier_name DOT ('CREATE' | 'DESTROY')    
-    |		identifier_name '::' identifier_name_ex            
-    ;
 
 identifier_name
     : ID
@@ -696,60 +686,63 @@ identifier_name
 
 // this one can be used in expressions like:
 // excel_object.Application.Sheets("Sheet1").Select()
-// identifier_name_ex is never the first part in the identifier (except for 'DESCRIBE').
+// identifier_name_ex is never the first part in the identifier
 identifier_name_ex
     : identifier_name
-    | 'SELECT' | 'TYPE' | 'UPDATE' | 'DELETE' | 'OPEN' | 'CLOSE' | 'GOTO' | 'INSERT' | 'DESCRIBE' | 'TIME' | 'READONLY'
+    | 'SELECT' | 'TYPE' | 'UPDATE' | 'DELETE' | T_OPEN | T_CLOSE 
+    | 'GOTO' | 'INSERT' | T_DESCRIBE | 'TIME' | 'READONLY' | 'CREATE'
+    | 'APPLICATION'
     ;
 
 fragment
-atom_sub
-    : (
-    	(
-    		(array_access_atom) => array_access_atom
-    	| (identifier_name LPAREN expression_list? RPAREN) => identifier_name LPAREN expression_list? RPAREN
-    	| identifier_name    	
-    	)	
-    	
-    	) 
-    ;
-    
-atom_sub_call1
-		// For 'describe' see comment in identifier_name_ex and also definition for 'atom'
-    : (identifier | 'DESCRIBE') LPAREN expression_list? RPAREN
+atom_call_suffix
+    : LPAREN expression_list? RPAREN
     ;
 
-atom_sub_array1    
-    : identifier_name '[' expression_list ']'
+fragment
+atom_array_access_suffix
+    : '[' expression_list? ']'
+    | '[]'
     ;
 
-atom_sub_ref1    
-    :  identifier_name '[]'
-    ;
-    
-atom_sub_member1    
-    :  identifier
-    ;
-    
-atom
-    :
-    (event_call_statement_sub) => event_call_statement_sub    
-    // Turn left-recursion into the rigth recursion - ugly but functional
-    | 
-    (atom_sub (DOT identifier_name_ex)) => atom_sub (DOT identifier_name_ex (LPAREN expression_list? RPAREN)? ('[' expression_list ']')? )+ ('++' | '--' | '[]' )?
-    | (cast_expression) => cast_expression        	
-    | (atom_sub_call1) => atom_sub_call1
-    | (atom_sub_array1) => atom_sub_array1 ('++' | '--')?
-    | (atom_sub_ref1) => atom_sub_ref1    
-    | (atom_sub_member1) => atom_sub_member1 ('++' | '--')?           
+
+atom :
+		(
+			identifier_name (atom_call_suffix | atom_array_access_suffix)?
+			(
+				DOT 
+				( ('FUNCTION'|'EVENT') ('STATIC'|'DYNAMIC')? ('POST' | 'TRIGGER')? identifier_name_ex atom_call_suffix
+				| ('STATIC'|'DYNAMIC') ('POST' | 'TRIGGER')? ('FUNCTION'|'EVENT')? identifier_name_ex atom_call_suffix
+				| ('POST' | 'TRIGGER') ('FUNCTION'|'EVENT')? identifier_name_ex atom_call_suffix				
+				|	identifier_name_ex (atom_call_suffix | atom_array_access_suffix)?
+				)
+			)*
+			(			  
+				FOUR_DOTS
+				('FUNCTION'|'EVENT')?	('POST' | 'TRIGGER')? identifier_name_ex atom_call_suffix
+			)?
+			('++' | '--')?
+		)
+		|
+		(
+			('FUNCTION'|'EVENT') ('STATIC'|'DYNAMIC')? ('POST' | 'TRIGGER')? identifier_name atom_call_suffix
+		)
+		|
+		(
+			('POST' | 'TRIGGER') ('FUNCTION'|'EVENT')? event_name atom_call_suffix
+		)
+		|		
+		(
+			(event_name_sub | data_type_sub | 'DESCRIBE' | 'UPDATE' ) atom_call_suffix
+		)
     | numeric_atom
     | boolean_atom
     | ENUM
     | DQUOTED_STRING
     | QUOTED_STRING
     | DATE
-    | TIME 
-    ;
+    | TIME 		
+     ;
 
 swallow_to_semi :
         ~( SEMI )+
@@ -758,9 +751,6 @@ swallow_to_semi :
 swallow_to_newline :
        ~( NEWLINE )+
     ;   
-array_access_atom
-	: identifier_name '[' expression_list ']' 
-	;
 	
 numeric_atom
     : NUMBER
@@ -776,7 +766,8 @@ cast_expression
 		;
 		
 data_type_sub
-    :   'ANY'
+    :   'APPLICATION'
+    |   'ANY'
     |   'BLOB'
     |   'BOOLEAN'
     |   'BYTE'
@@ -810,7 +801,28 @@ delim
     : NEWLINE
     | DELIM
     | EOF
+    | SEMI
     ;
+
+T_CLOSE:        'CLOSE';
+T_COMMIT:       'COMMIT';
+T_CONNECT:      'CONNECT';
+T_DECLARE:      'DECLARE';
+T_DELETE:       'DELETE';
+T_DESCRIBE:     'DESCRIBE';
+T_DISCONNECT:   'DISCONNECT';
+T_EXECUTE:      'EXECUTE';
+T_FETCH:        'FETCH';
+T_IMMEDIATE:    'IMMEDIATE';
+T_INSERT:       'INSERT';
+T_MERGE:        'MERGE';
+T_OPEN:         'OPEN';
+T_PREPARE:      'PREPARE';
+T_ROLLBACK:     'ROLLBACK';
+T_SELECT:       'SELECT';
+T_SELECTBLOB:   'SELECTBLOB';
+T_UPDATE:       'UPDATE';			
+T_UPDATEBLOB:   'UPDATEBLOB';
     
 DQUOTED_STRING
     :   '"' (E_TILDE | ~('"') | E_DOUBLE_QUOTE )* '"'
@@ -822,7 +834,7 @@ QUOTED_STRING
 
 fragment
 ID_PARTS
-		: 'A' .. 'Z' ( 'A' .. 'Z' | DIGIT | '-' | '$' | '#' | '%' | '_' )*
+		: ('A' .. 'Z' | '#') ( 'A' .. 'Z' | DIGIT | '-' | '$' | '#' | '%' | '_' )*
 		;
 
 ENUM
@@ -837,7 +849,15 @@ ID  :
         ID_PARTS
     ;
 
-SEMI : ';';
+SEMI :
+    ';'
+// NOTE: this breaks SQL statements     
+//    WS* n='\r\n'?
+//    {
+//    	if( $n != null)
+//    	$type = DELIM;
+//    }
+		;
 
 LPAREN : '(';
 
@@ -859,6 +879,8 @@ fragment
 NUM : DIGIT ( DIGIT )*;
 
 DOT : POINT;
+
+FOUR_DOTS : '::';
 
 fragment
 POINT : '.';
@@ -939,8 +961,21 @@ NEWLINE
 					break;
 				if(c.equals(";"))
 					break;					
-				if(c.equals("/") && p.equals("*"))
-					break;
+				if(p.equals("*") && c.equals("/") && pos >= 4)
+				{
+				  pos--;
+					while(pos-- >= 1)
+					{
+						c = input.substring(pos, pos);
+						p = input.substring(pos-1, pos-1);
+						if(p.equals("/") && c.equals("*"))
+						{
+						  pos--;
+						  break;
+						}											
+					}
+					continue;
+				}					
 				if(!c.equals(" ") && !c.equals("\t"))
 				{
 					textFound = true;
@@ -960,9 +995,12 @@ NEWLINE
 	;
 	
 LINE_CONTINUATION
-	: '&' WS*  '\r\n' 
-	{ 
-	$channel = HIDDEN;
+	: '&' w1=WS*  eol1='\r\n' w2=WS* eol2=('\r\n')?
+	{
+		if( $eol2 == null)		
+			$channel = HIDDEN;
+		else
+			$channel = NEWLINE;
 	//System.out.println("Line continuation at: " + input.getLine()); 
 	}
 	;
@@ -975,10 +1013,7 @@ EXPORT_HEADER
 	;
 
 PBSELECT
-	: p=('PBSELECT' ~('\n'|'\r')*) 
-	{
-		
-	}
+	: ('PBSELECT' ~('\n'|'\r')*)
 	;
 	
 DATE // 1996-09-26
