@@ -7,6 +7,10 @@ import java.util.Set;
 public enum WindowTypeEnum {
 	//suffixes = Arrays.asList(".sra", ".srd", ".srf", ".srj", ".srm", ".srq", ".srs", ".sru", ".srw");
 	APP("sra"),
+<<<<<<< HEAD
+	DATA("srd"),
+	WINOBJ("srw");
+=======
 	DATA_WINDOW("srd"),
 	FUNCTION("srf"),
 	PIPELINE("srp"),
@@ -16,6 +20,7 @@ public enum WindowTypeEnum {
 	STRUCT("srs"),
 	USER_OBJ("sru"),
 	WININDOW("srw");	
+>>>>>>> 56b435f28c3f0120dc83f9419bb89779d78f3dc8
 	
 	public String getSuffix() {
 		return _suffix;		

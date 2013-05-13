@@ -23,6 +23,15 @@ public class WindowFactory {
 	public PBFile createWindow(File filename) throws IOException, RecognitionException {
 		QFileInfo f = new QFileInfo(filename.getName());
 
+<<<<<<< HEAD
+		if (!file.exists()) {
+			throw new RuntimeException("File does not exist: " + filename);
+		}
+
+		Tree AST = parse(filename);
+
+		switch (WindowTypeEnum.enumFromSuffix(file.suffix())) {
+=======
 		if (!filename.isFile()) {
 			throw new RuntimeException("File does not exist: " + filename);		
 		}
@@ -31,11 +40,15 @@ public class WindowFactory {
 		
 		PBFile window = null;		
 		switch (WindowTypeEnum.enumFromSuffix(f.suffix())) {
+>>>>>>> 56b435f28c3f0120dc83f9419bb89779d78f3dc8
 		case APP:
-			window = new AppWindow();			
+			window = new AppWindow();
 			break;
 		case DATA_WINDOW:
 			window = new DataWindow();
+			break;
+		case WINOBJ:
+			window = new ObjectWindow();
 			break;
 		default:
 			return null;
@@ -47,8 +60,12 @@ public class WindowFactory {
 		return window;
 	}
 
+<<<<<<< HEAD
+	private final Tree parse(String filename) throws IOException, RecognitionException {
+=======
 	private final Tree parse(File filename) throws IOException,
 			RecognitionException {
+>>>>>>> 56b435f28c3f0120dc83f9419bb89779d78f3dc8
 		try {
 			PBMLexer lex = new PBMLexer(new ANTLRNoCaseFileStream(filename.getAbsolutePath()));
 			CommonTokenStream tokens = new CommonTokenStream(lex);
@@ -56,8 +73,7 @@ public class WindowFactory {
 
 			PBMParser.start_rule_return AST = parser.start_rule();
 
-			System.err.println(filename + ": "
-					+ parser.getNumberOfSyntaxErrors());
+			System.err.println(filename + ": " + parser.getNumberOfSyntaxErrors());
 
 			if (parser.getNumberOfSyntaxErrors() != 0) {
 				// TODO THROW SOMETHING HERE
