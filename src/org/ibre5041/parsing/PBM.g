@@ -235,7 +235,7 @@ variable_decl_sub
     ;
 
 variable_decl
-		: variable_decl_sub (SEMI | delim)
+		: variable_decl_sub delim
 		;
 		
 decimal_decl_sub
@@ -253,7 +253,7 @@ constant_decl_sub
     ;   
 
 constant_decl
-		: constant_decl_sub (SEMI | delim)
+		: constant_decl_sub delim
 		;
 		
 function_forward_decl
@@ -297,7 +297,7 @@ function_body
 	LPAREN
 	parameters_list_sub?
 	RPAREN 	('THROWS' identifier_name)?
-	(SEMI | delim)
+	delim
 	(statement)*
 	'END' ('FUNCTION'|'SUBROUTINE') delim
 	;
@@ -572,12 +572,12 @@ if_statement
 				'ELSE' delim
 				statement* 
 			)?
-			'END' 'IF' (SEMI | delim)
+			'END' 'IF' delim
 		;
 
 // NOTE this one is single liner (all statements end with delim)
 if_simple_statement
-		: 'IF' boolean_expression 'THEN' statement_sub ('ELSE' statement_sub)? (SEMI | delim)
+		: 'IF' boolean_expression 'THEN' statement_sub ('ELSE' statement_sub)? delim
 		;
 
 continue_sub
@@ -1000,7 +1000,7 @@ LINE_CONTINUATION
 		if( $eol2 == null)		
 			$channel = HIDDEN;
 		else
-			$channel = NEWLINE;
+			$type = DELIM;
 	//System.out.println("Line continuation at: " + input.getLine()); 
 	}
 	;
@@ -1034,3 +1034,7 @@ TQ : '???';
 DOUBLE_PIPE
  	 : '||' // used in Oracle SQL statements (see swallow_to_semi)
  	 ;
+
+AT
+   : '@'  // used in Oracle SQL statements (see swallow_to_semi)
+   ;
